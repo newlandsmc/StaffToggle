@@ -3,3 +3,6 @@ messages:
     - '<gray>Toggled</gray> <green>On</green><gray> staff mode'
   toggle-off:
     - '<gray>Toggled</gray> <red>Off</red><gray> staff mode'
+actionbar:
+  enable: true
+  bar: '<green>You are currently in staff mode</green>'
