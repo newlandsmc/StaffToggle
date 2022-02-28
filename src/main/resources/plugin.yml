@@ -1,0 +1,9 @@
+name: StaffToggle
+version: '${project.version}'
+main: com.semivanilla.stafftoggle.StaffToggle
+api-version: 1.18
+commands:
+  stafftoggle:
+    aliases:
+      - 'st'
+    permission: 'stafftoggle.use'

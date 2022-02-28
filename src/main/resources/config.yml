@@ -1,0 +1,5 @@
+messages:
+  toggle-on:
+    - '<gray>Toggled</gray> <green>On</green><gray> staff mode'
+  toggle-off:
+    - '<gray>Toggled</gray> <red>Off</red><gray> staff mode'
