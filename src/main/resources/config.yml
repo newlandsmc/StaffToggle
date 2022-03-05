@@ -6,3 +6,10 @@ messages:
 actionbar:
   enable: true
   bar: '<green>You are currently in staff mode</green>'
+commands:
+  off:
+    - 'fly off'
+    - 'v off'
+    - 'gm 0'
+  on:
+    - ''
