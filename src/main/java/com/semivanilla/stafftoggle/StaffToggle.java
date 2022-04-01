@@ -1,11 +1,13 @@
 package com.semivanilla.stafftoggle;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,12 +22,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public final class StaffToggle extends JavaPlugin implements Listener {
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.get();
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static Set<UUID> inStaffMode = new HashSet<>();
+    private static List<String> onCommands = new ArrayList<>();
+    private static List<String> offCommands = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -37,6 +40,21 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         }
         getCommand("stafftoggle").setExecutor(this);
         getServer().getPluginManager().registerEvents(this, this);
+        if (getConfig().getBoolean("actionbar.enable")) {
+            Component bar = MINI_MESSAGE.deserialize(getConfig().getString("actionbar.bar"));
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+                for (UUID uuid : inStaffMode) {
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null) {
+                        player.sendActionBar(bar);
+                    }else inStaffMode.remove(uuid);
+                }
+            }, 20l, 20l);
+        }
+        onCommands.clear();
+        onCommands.addAll(getConfig().getStringList("commands.on"));
+        offCommands.clear();
+        offCommands.addAll(getConfig().getStringList("commands.off"));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -60,6 +78,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
             if (toggleOff.length > 0 && toggleOff[0]) {
                 user.data().remove(Node.builder("group." + group).build());
                 lp.getUserManager().saveUser(user);
+                inStaffMode.remove(player.getUniqueId());
                 return;
             }
             boolean toggleOn = user.getNodes().stream().noneMatch(n -> n.getKey().equalsIgnoreCase("group." + group));
@@ -67,14 +86,24 @@ public final class StaffToggle extends JavaPlugin implements Listener {
                 user.data().add(Node.builder("group." + group).build());
                 List<String> messages = getConfig().getStringList("messages.toggle-on");
                 for (String message : messages) {
-                    player.sendMessage(MINI_MESSAGE.parse(message));
+                    player.sendMessage(MINI_MESSAGE.deserialize(message));
+                }
+                inStaffMode.add(player.getUniqueId());
+                for (String onCommand : onCommands) {
+                    if (onCommand.isEmpty()) continue;
+                    player.performCommand(onCommand.replace("%player%", player.getName()));
                 }
             } else {
                 List<String> messages = getConfig().getStringList("messages.toggle-off");
                 for (String message : messages) {
-                    player.sendMessage(MINI_MESSAGE.parse(message));
+                    player.sendMessage(MINI_MESSAGE.deserialize(message));
                 }
                 user.data().remove(Node.builder("group." + group).build());
+                inStaffMode.remove(player.getUniqueId());
+                for (String offCommand : offCommands) {
+                    if (offCommand.isEmpty()) continue;
+                    player.performCommand(offCommand.replace("%player%", player.getName()));
+                }
             }
             lp.getUserManager().saveUser(user);
         }
