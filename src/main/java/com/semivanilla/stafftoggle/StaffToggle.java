@@ -41,7 +41,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLogout(PlayerQuitEvent event) {
-        toggle(event.getPlayer(), true);
+        //toggle(event.getPlayer(), true);
     }
 
     public void toggle(Player player, boolean... toggleOff) {
