@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +61,16 @@ public final class StaffToggle extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLogout(PlayerQuitEvent event) {
         toggle(event.getPlayer(), true);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        getServer().getScheduler().runTaskLater(this, ()-> {
+            if (player != null && player.isOnline()) {
+                toggle(player, true);
+            }
+        }, 20L);
     }
 
     public void toggle(Player player, boolean... toggleOff) {
