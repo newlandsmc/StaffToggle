@@ -22,7 +22,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.util.*;
 
@@ -31,6 +30,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
     private static Set<UUID> inStaffMode = new HashSet<>();
     private static List<String> onCommands = new ArrayList<>();
     private static List<String> offCommands = new ArrayList<>();
+    private FileConfiguration config = null;
 
     @Override
     public void onEnable() {
@@ -49,7 +49,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
                     Player player = Bukkit.getPlayer(uuid);
                     if (player != null) {
                         player.sendActionBar(bar);
-                    }else inStaffMode.remove(uuid);
+                    } else inStaffMode.remove(uuid);
                 }
             }, 20l, 20l);
         }
@@ -158,8 +158,6 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         toggle(player);
         return true;
     }
-
-    private FileConfiguration config = null;
 
     @Override
     public @NotNull FileConfiguration getConfig() {
