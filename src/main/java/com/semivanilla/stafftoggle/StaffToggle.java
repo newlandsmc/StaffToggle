@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.util.*;
 
@@ -66,14 +67,28 @@ public final class StaffToggle extends JavaPlugin implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        checkStaff(player);
+        /*
         getServer().getScheduler().runTaskLater(this, ()-> {
             if (player != null && player.isOnline()) {
                 toggle(player, true);
             }
         }, 20L);
+         */
     }
 
-    public void toggle(Player player, boolean... toggleOff) {
+    public void checkStaff(Player player) {
+        if (player == null) return;
+        if (inStaffMode.contains(player.getUniqueId())) {
+            return;
+        }
+        Triplet<Boolean, Optional<Node>, User> triplet = checkPermission(player);
+        if (triplet.getValue0()) {
+            inStaffMode.add(player.getUniqueId());
+        }
+    }
+
+    public Triplet<Boolean, Optional<Node>, User> checkPermission(Player player) {
         LuckPerms lp = LuckPermsProvider.get();
         User user = lp.getUserManager().getUser(player.getUniqueId());
         List<Group> groups = new ArrayList<>();
@@ -83,6 +98,15 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         groups.forEach(g -> nodes.addAll(g.getNodes()));
         Optional<Node> optionalNode = nodes.stream().filter(n -> n.getValue() && !n.hasExpired() && !n.isNegated() && n.getKey().toLowerCase().startsWith("stafftoggle.")).findFirst();
         boolean hasPerm = optionalNode.isPresent();
+        return new Triplet<>(hasPerm, optionalNode, user);
+    }
+
+    public void toggle(Player player, boolean... toggleOff) {
+        Triplet<Boolean, Optional<Node>, User> triplet = checkPermission(player);
+        boolean hasPerm = triplet.getValue0();
+        Optional<Node> optionalNode = triplet.getValue1();
+        User user = triplet.getValue2();
+        LuckPerms lp = LuckPermsProvider.get();
         if (hasPerm) {
             Node node = optionalNode.get();
             String group = node.getKey().replace("stafftoggle.", "");
