@@ -82,8 +82,8 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         if (inStaffMode.contains(player.getUniqueId())) {
             return;
         }
-        Triplet<Boolean, Optional<Node>, User> triplet = checkPermission(player);
-        if (triplet.getValue0()) {
+        if (isInStaffMode(player)) {
+            player.sendMessage(MINI_MESSAGE.deserialize(getConfig().getString("messages.log-on", "<green>You''re still in staff mode!")));
             inStaffMode.add(player.getUniqueId());
         }
     }
@@ -99,6 +99,19 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         Optional<Node> optionalNode = nodes.stream().filter(n -> n.getValue() && !n.hasExpired() && !n.isNegated() && n.getKey().toLowerCase().startsWith("stafftoggle.")).findFirst();
         boolean hasPerm = optionalNode.isPresent();
         return new Triplet<>(hasPerm, optionalNode, user);
+    }
+
+    public boolean isInStaffMode(Player player) {
+        Triplet<Boolean, Optional<Node>, User> triplet = checkPermission(player);
+        boolean hasPerm = triplet.getValue0();
+        Optional<Node> optNode = triplet.getValue1();
+        User user = triplet.getValue2();
+        if (hasPerm && optNode.isPresent()) {
+            Node node = optNode.get();
+            String group = node.getKey().replace("stafftoggle.", "");
+            return user.getNodes().stream().anyMatch(n -> n.getKey().equalsIgnoreCase("group." + group));
+        }
+        return false;
     }
 
     public void toggle(Player player, boolean... toggleOff) {
