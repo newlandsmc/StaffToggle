@@ -83,7 +83,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
             return;
         }
         if (isInStaffMode(player)) {
-            player.sendMessage(MINI_MESSAGE.deserialize(getConfig().getString("messages.log-on", "<green>You''re still in staff mode!")));
+            player.sendMessage(MINI_MESSAGE.deserialize(getConfig().getString("messages.log-on", "<green>You're still in staff mode!")));
             inStaffMode.add(player.getUniqueId());
         }
     }
