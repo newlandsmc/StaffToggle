@@ -60,6 +60,7 @@ public final class StaffToggle extends JavaPlugin implements Listener {
         offCommands.clear();
         offCommands.addAll(getConfig().getStringList("commands.off"));
 
+        stillInStaffMode = new ArrayList<>();
         for (String s : getConfig().getStringList("messages.log-on")) {
             stillInStaffMode.add(MINI_MESSAGE.deserialize(s));
         }
