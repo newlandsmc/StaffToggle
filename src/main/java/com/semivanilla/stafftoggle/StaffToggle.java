@@ -32,6 +32,8 @@ public final class StaffToggle extends JavaPlugin implements Listener {
     private static List<String> offCommands = new ArrayList<>();
     private FileConfiguration config = null;
 
+    private List<Component> stillInStaffMode;
+
     @Override
     public void onEnable() {
         if (!getDataFolder().exists())
@@ -51,12 +53,16 @@ public final class StaffToggle extends JavaPlugin implements Listener {
                         player.sendActionBar(bar);
                     } else inStaffMode.remove(uuid);
                 }
-            }, 20l, 20l);
+            }, 20L, 20L);
         }
         onCommands.clear();
         onCommands.addAll(getConfig().getStringList("commands.on"));
         offCommands.clear();
         offCommands.addAll(getConfig().getStringList("commands.off"));
+
+        for (String s : getConfig().getStringList("messages.log-on")) {
+            stillInStaffMode.add(MINI_MESSAGE.deserialize(s));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -83,7 +89,9 @@ public final class StaffToggle extends JavaPlugin implements Listener {
             return;
         }
         if (isInStaffMode(player)) {
-            player.sendMessage(MINI_MESSAGE.deserialize(getConfig().getString("messages.log-on", "<green>You're still in staff mode!")));
+            for (Component component : stillInStaffMode) {
+                player.sendMessage(component);
+            }
             inStaffMode.add(player.getUniqueId());
         }
     }
